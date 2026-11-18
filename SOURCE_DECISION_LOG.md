@@ -89,7 +89,7 @@
 ### Upstream Tracing & Open-Source Search
 - **Authoritative Upstream:** Global Legal Entity Identifier Foundation (**GLEIF**), `https://api.gleif.org/api/v1/lei-records` (`verified`). Unlike IFSC (where we used an MIT mirror), this is the **direct authoritative global registry**, free, unauthenticated, and updated 3x daily.
 - **Live Probe (`2026-11-18`):** `https://api.gleif.org/api/v1/lei-records?filter[entity.legalAddress.country]=IN` returned HTTP `200` with **`411,277`** Indian corporate entities (`verified`).
-- **Entity Richness:** Records include `lei`, `legalName`, `status`, `legalAddress.postalCode`, `registeredAt.id` (e.g., `RA000394` = MCA India), and `registeredAs` — which directly surfaces **MCA CINs/LLPINs**, **public GSTINs**, and **Udyam MSME IDs** (`verified`).
+- **Entity Richness (`verified` in `warehouse.dim_lei`):** Across our `200` ingested Indian LEI rows, `registered_as` breaks down to **91 GSTINs**, **63 MCA CINs**, **23 LLPINs**, **14 Udyam MSME IDs**, **7 other**, and **2 null** (`1.0%`), with `registration_authority_id = RA000394` (MCA India).
 
 ### Legitimacy Audit
 - **License:** **CC0 1.0 Universal (Public Domain)** (`verified`). Commercial aggregation and redistribution are explicitly permitted without restriction.
@@ -103,10 +103,10 @@
 | **Owner** | Global Legal Entity Identifier Foundation (GLEIF) |
 | **License** | CC0 1.0 Universal (Public Domain) |
 | **Auth Type** | None (open REST API) |
-| **Refresh Cadence** | Daily (GLEIF publishes 3x daily) |
-| **Format & Size** | JSON:API (`411,277` Indian entities; `200` landed across 2 pages in demo) |
+| **Refresh Cadence** | `undetermined` from API response (GLEIF SLA not fetched) |
+| **Format & Size** | JSON:API (`411,277` Indian entities; `10,000` landed across `50` pages of `200` before hitting GLEIF's `10,000`-result deep-pagination cap) |
 | **Access Date** | `2026-11-18` |
-| **Known Limitations** | Covers entities that have obtained an LEI (typically larger corporates, exporters, borrowers); `1.0%` of sampled records had null `registered_as` (`verified`). |
+| **Known Limitations** | REST API returns `HTTP 400` beyond `page[number] * page[size] = 10,000`; `goldencopy.gleif.org/robots.txt` returned `403` (blocked fail-closed). `2.79%` of sampled `10,000` records had null `registered_as` (`verified`). |
 
 ---
 

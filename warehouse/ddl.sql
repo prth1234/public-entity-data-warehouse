@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS warehouse.dim_bank_branch (
     state_name VARCHAR,
     gst_state_code VARCHAR,
     pincode VARCHAR,
+    pincode_source VARCHAR,
     micr VARCHAR,
     neft BOOLEAN,
     rtgs BOOLEAN,
@@ -93,6 +94,17 @@ CREATE TABLE IF NOT EXISTS warehouse.dim_lei (
     city VARCHAR,
     country VARCHAR,
     pincode VARCHAR,
+    source VARCHAR NOT NULL,
+    ingested_at VARCHAR NOT NULL,
+    source_version VARCHAR NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS warehouse.dim_pincode (
+    pincode VARCHAR PRIMARY KEY,
+    state_name VARCHAR,
+    district VARCHAR,
+    office_name VARCHAR,
+    office_count INTEGER,
     source VARCHAR NOT NULL,
     ingested_at VARCHAR NOT NULL,
     source_version VARCHAR NOT NULL

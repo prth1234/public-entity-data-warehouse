@@ -49,4 +49,17 @@ sources:
     robots_verdict: "https://api.gleif.org/robots.txt returned 200 Disallow: (open)"
     tos_verdict: "CC0 public domain; commercial aggregation & redistribution explicitly permitted"
     status: "active"
-    notes: "411,277 Indian corporate entities; surfaces LEI, legal name, status, pincode, and registeredAs (MCA CIN/LLPIN, GSTIN, or Udyam ID)."
+    notes: "411,277 Indian corporate entities; surfaces LEI, legal name, status, pincode, and registeredAs (MCA CIN/LLPIN, GSTIN, or Udyam ID). REST API caps deep pagination at 10,000 rows."
+
+  india_post_pincode:
+    name: "All India Pincode Directory (India Post via data.gov.in / MIT mirror)"
+    owner: "Department of Posts, Govt. of India (upstream) / dropdevrahul (MIT mirror)"
+    url: "https://raw.githubusercontent.com/dropdevrahul/pincodes-india/main/pincode.csv"
+    license: "MIT License (mirror) / GODL (data.gov.in resource 5c2f62fe-5afa-4119-a499-fec9d604d5bd)"
+    auth_type: "none (public raw CSV)"
+    refresh_cadence: "monthly (mirror updated 2026-10-29)"
+    access_date: "2026-11-18"
+    robots_verdict: "Verified via robots_checker before fetch"
+    tos_verdict: "MIT License & GODL permit commercial aggregation with attribution"
+    status: "active"
+    notes: "Used for dim_pincode and to backfill missing pincodes in dim_bank_branch via (state_name, district)."

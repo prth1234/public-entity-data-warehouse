@@ -9,7 +9,9 @@ from pathlib import Path
 import pytest
 
 from src.ingest.raw_landing import write_raw_payload
+from src.transform.pincode import backfill_branch_pincodes, transform_pincode_directory
 from src.transform.standardise import extract_pincode, normalise_state
+import pandas as pd
 from src.validate.schema_drift import check_schema_drift
 from src.validate.validators import (
     IfscBranchRecord,
@@ -108,3 +110,38 @@ def test_warehouse_idempotency() -> None:
     assert res1["warehouse_counts"] == res2["warehouse_counts"]
     assert res2["warehouse_counts"]["dim_bank_branch"] >= 180000
     assert res2["warehouse_counts"]["dim_company"] >= 30
+    assert res2["warehouse_counts"]["dim_pincode"] >= 19000
+    assert res2["warehouse_counts"]["dim_lei"] >= 10000
+
+
+def test_pincode_transform_and_backfill(tmp_path: Path) -> None:
+    csv_bytes = (
+        b'"CircleName","RegionName","DivisionName","OfficeName","Pincode","OfficeType","Delivery","District","StateName","Latitude","Longitude"\n'
+        b'"Gujarat Circle","Vadodara","Vadodara","Alkapuri S.O","390007","SO","Delivery","VADODARA","GUJARAT","22.3","73.1"\n'
+        b'"Gujarat Circle","Vadodara","Vadodara","Bad Pin","99999","SO","Delivery","VADODARA","GUJARAT","22.3","73.1"\n'
+    )
+    write_raw_payload(
+        base_dir=tmp_path,
+        source="india_post_pincode",
+        filename="pincode.csv",
+        payload=csv_bytes,
+        source_url="https://example.org/pincode.csv",
+        http_status=200,
+        source_version="test",
+        date_str="2026-11-18",
+    )
+    pin_df, metrics = transform_pincode_directory(tmp_path / "data" / "raw" / "india_post_pincode" / "2026-11-18")
+    assert metrics["unique_pincodes"] == 1
+    assert metrics["invalid_pincode_dropped"] == 1
+
+    ifsc_df = pd.DataFrame([
+        {"ifsc": "SBIN0000001", "state_name": "GUJARAT", "district": "VADODARA", "pincode": "390001"},
+        {"ifsc": "SBIN0000002", "state_name": "GUJARAT", "district": "VADODARA", "pincode": None},
+        {"ifsc": "SBIN0000003", "state_name": "GUJARAT", "district": "UNKNOWN_DIST", "pincode": None},
+    ])
+    filled_df, stats = backfill_branch_pincodes(ifsc_df, pin_df)
+    assert stats["filled_from_district"] == 1
+    assert filled_df.loc[0, "pincode_source"] == "original"
+    assert filled_df.loc[1, "pincode"] == "390007"
+    assert filled_df.loc[1, "pincode_source"] == "inferred_from_district"
+    assert pd.isna(filled_df.loc[2, "pincode_source"])

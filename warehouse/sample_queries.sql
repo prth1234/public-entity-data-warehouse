@@ -73,3 +73,12 @@ GROUP BY
     l.city, l.pincode, c.company_status
 ORDER BY branches_in_pincode DESC, l.lei
 LIMIT 10;
+
+-- Query 5: IFSC pincode backfill breakdown (original vs inferred_from_district vs NULL)
+SELECT
+    COALESCE(pincode_source, 'unmatched') AS pincode_source,
+    COUNT(*) AS branch_count,
+    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) AS pct_of_branches
+FROM warehouse.dim_bank_branch
+GROUP BY COALESCE(pincode_source, 'unmatched')
+ORDER BY branch_count DESC;

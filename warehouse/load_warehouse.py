@@ -11,6 +11,7 @@ from typing import Any
 import duckdb
 import pandas as pd
 
+from src.transform.pincode import backfill_branch_pincodes, transform_pincode_directory
 from src.transform.standardise import (
     build_state_dim_df,
     build_validated_gstin_fixture_df,
@@ -48,9 +49,12 @@ def run_warehouse_load(base_dir: Path, db_path: Path | None = None) -> dict[str,
     mca_dir = latest_raw_date_dir(base_dir, "mca_company")
     gst_dir = latest_raw_date_dir(base_dir, "gst_masters")
     gleif_dir = latest_raw_date_dir(base_dir, "gleif_lei")
+    pincode_dir = latest_raw_date_dir(base_dir, "india_post_pincode")
 
     state_df = build_state_dim_df()
     ifsc_df, ifsc_metrics = transform_ifsc(ifsc_dir)
+    pincode_df, pincode_metrics = transform_pincode_directory(pincode_dir)
+    ifsc_df, backfill_stats = backfill_branch_pincodes(ifsc_df, pincode_df)
     mca_df, mca_metrics = transform_mca(mca_dir)
     hsn_df, hsn_metrics = transform_gst_hsn_sac(gst_dir)
     lei_df, lei_metrics = transform_gleif_lei(gleif_dir)
@@ -64,6 +68,8 @@ def run_warehouse_load(base_dir: Path, db_path: Path | None = None) -> dict[str,
     con = duckdb.connect(str(db_path))
     ddl_sql = (base_dir / "warehouse" / "ddl.sql").read_text(encoding="utf-8")
     con.execute(ddl_sql)
+    # Ensure schema evolution on existing DuckDB file
+    con.execute("ALTER TABLE warehouse.dim_bank_branch ADD COLUMN IF NOT EXISTS pincode_source VARCHAR")
 
     # Register staging frames
     con.register("stg_state_df", state_df)
@@ -71,6 +77,7 @@ def run_warehouse_load(base_dir: Path, db_path: Path | None = None) -> dict[str,
     con.register("stg_mca_df", mca_df)
     con.register("stg_hsn_df", hsn_df)
     con.register("stg_lei_df", lei_df)
+    con.register("stg_pincode_df", pincode_df)
     con.register("stg_gstin_df", gstin_df)
 
     # Materialise raw_staging tables
@@ -78,21 +85,27 @@ def run_warehouse_load(base_dir: Path, db_path: Path | None = None) -> dict[str,
     con.execute("CREATE OR REPLACE TABLE raw_staging.stg_mca AS SELECT * FROM stg_mca_df")
     con.execute("CREATE OR REPLACE TABLE raw_staging.stg_hsn_sac AS SELECT * FROM stg_hsn_df")
     con.execute("CREATE OR REPLACE TABLE raw_staging.stg_lei AS SELECT * FROM stg_lei_df")
+    con.execute("CREATE OR REPLACE TABLE raw_staging.stg_pincode AS SELECT * FROM stg_pincode_df")
     con.execute("CREATE OR REPLACE TABLE raw_staging.stg_gstin AS SELECT * FROM stg_gstin_df")
 
     # Idempotent dimension loads
     con.execute("INSERT OR REPLACE INTO warehouse.dim_state SELECT * FROM stg_state_df")
     con.execute("""
-        INSERT OR REPLACE INTO warehouse.dim_bank_branch
+        INSERT OR REPLACE INTO warehouse.dim_bank_branch (
+            ifsc, bank_code, bank_name, branch_name, address, city, district,
+            state_name, gst_state_code, pincode, pincode_source, micr,
+            neft, rtgs, imps, upi, source, ingested_at, source_version
+        )
         SELECT
             ifsc, bank_code, bank_name, branch_name, address, city, district,
-            state_name, gst_state_code, pincode, micr, neft, rtgs, imps, upi,
-            source, ingested_at, source_version
+            state_name, gst_state_code, pincode, pincode_source, micr,
+            neft, rtgs, imps, upi, source, ingested_at, source_version
         FROM stg_ifsc_df
     """)
     con.execute("INSERT OR REPLACE INTO warehouse.dim_gstin SELECT * FROM stg_gstin_df")
     con.execute("INSERT OR REPLACE INTO warehouse.dim_hsn_sac SELECT * FROM stg_hsn_df")
     con.execute("INSERT OR REPLACE INTO warehouse.dim_lei SELECT * FROM stg_lei_df")
+    con.execute("INSERT OR REPLACE INTO warehouse.dim_pincode SELECT * FROM stg_pincode_df")
 
     # SCD Type 2 for warehouse.dim_company
     mca_df["record_hash"] = mca_df.apply(_record_hash, axis=1)
@@ -183,6 +196,7 @@ def run_warehouse_load(base_dir: Path, db_path: Path | None = None) -> dict[str,
         "dim_gstin": con.execute("SELECT COUNT(*) FROM warehouse.dim_gstin").fetchone()[0],
         "dim_hsn_sac": con.execute("SELECT COUNT(*) FROM warehouse.dim_hsn_sac").fetchone()[0],
         "dim_lei": con.execute("SELECT COUNT(*) FROM warehouse.dim_lei").fetchone()[0],
+        "dim_pincode": con.execute("SELECT COUNT(*) FROM warehouse.dim_pincode").fetchone()[0],
         "fact_company_status_snapshot": con.execute("SELECT COUNT(*) FROM warehouse.fact_company_status_snapshot").fetchone()[0],
         "fact_gst_registration": con.execute("SELECT COUNT(*) FROM warehouse.fact_gst_registration").fetchone()[0],
     }
@@ -192,6 +206,8 @@ def run_warehouse_load(base_dir: Path, db_path: Path | None = None) -> dict[str,
         "db_path": str(db_path),
         "metrics": {
             "ifsc": ifsc_metrics,
+            "ifsc_pincode_backfill": backfill_stats,
+            "pincode": pincode_metrics,
             "mca": mca_metrics,
             "hsn_sac": hsn_metrics,
             "gleif_lei": lei_metrics,
