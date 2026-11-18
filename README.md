@@ -1,4 +1,4 @@
-# Zintrl Data Engineering Take-Home: Public Entity Data Sourcing & Warehouse
+# Public Entity Data Sourcing & Enrichment Pipeline
 
 Compliance-first, end-to-end data sourcing and warehousing pipeline built on **public, free, and legitimately accessible** Indian entity-level datasets:
 1. **RBI IFSC / Bank Branch Master** (`razorpay/ifsc` `v2.0.62`, MIT License — **183,214** branches)

@@ -1,4 +1,4 @@
-# Zintrl Data Engineering Take-Home: Public API Discovery, Sourcing & Warehouse Pipeline
+# Public Entity Data Sourcing & Enrichment Architecture
 
 **Author:** Parth Singh  
 **Date:** `2026-11-18`  
