@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/raw/
+warehouse/zintrl.duckdb
+warehouse/zintrl.duckdb.wal
+warehouse/target/
+warehouse/dbt_packages/
+.DS_Store

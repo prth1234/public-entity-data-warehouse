@@ -1,0 +1,7 @@
+zintrl_duckdb:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_PATH', 'warehouse/zintrl.duckdb') }}"
+      threads: 4

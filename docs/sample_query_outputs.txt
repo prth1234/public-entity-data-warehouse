@@ -1,0 +1,23 @@
+=== QUERY 1 ===
+gst_state_code state_name  mca_companies  total_bank_branches  branches_in_company_pincode
+            24    GUJARAT           2000                12104                         5359
+
+=== QUERY 2 ===
+                  cin                       company_name company_status  incorporation_year ownership_type state_name pincode  branches_in_same_pincode  upi_enabled_branches
+L31100GJ1993PLC019635       RANJEET MECHATRONICS LIMITED         ACTIVE                1993            PLC    GUJARAT  380015                       134                 130.0
+L36999GJ2022PLC130379 KOURA FINE DIAMOND JEWELRY LIMITED         ACTIVE                2022            PLC    GUJARAT  380015                       134                 130.0
+L45201GJ1982PLC005148            B NANJI ENTERPRISES LTD         ACTIVE                1982            PLC    GUJARAT  380015                       134                 130.0
+L51100GJ1984PLC007506          MALLI ENTERPRISES LIMITED         ACTIVE                1984            PLC    GUJARAT  380015                       134                 130.0
+L51909GJ1986PLC008539      PERVASIVE COMMODITIES LIMITED         ACTIVE                1986            PLC    GUJARAT  380015                       134                 130.0
+L52291GJ1983PLC093146         VAXFAB ENTERPRISES LIMITED         ACTIVE                1983            PLC    GUJARAT  380015                       134                 130.0
+L64990GJ2015PLC084071              VITTAM BHARAT LIMITED         ACTIVE                2015            PLC    GUJARAT  380015                       134                 130.0
+L67120GJ1990PLC014094             SAMBHAAV MEDIA LIMITED         ACTIVE                1990            PLC    GUJARAT  380015                       134                 130.0
+L67120GJ1993PLC086576             ISL CONSULTING LIMITED         ACTIVE                1993            PLC    GUJARAT  380015                       134                 130.0
+L70100GJ1992PLC017815   BHARAT GLOBAL DEVELOPERS LIMITED         ACTIVE                1992            PLC    GUJARAT  380015                       134                 130.0
+
+=== QUERY 3 ===
+gst_state_code  state_name  validated_gstins  mca_companies  bank_branches
+            24     GUJARAT                 1           2000          12104
+            07       DELHI                 1              0           4722
+            29   KARNATAKA                 1              0          13368
+            27 MAHARASHTRA                 1              0          24281

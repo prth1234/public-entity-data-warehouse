@@ -1,0 +1,26 @@
+SELECT
+    cin,
+    company_name,
+    company_status,
+    listing_status,
+    industry_code,
+    cin_state_code,
+    incorporation_year,
+    ownership_type,
+    registration_number,
+    roc_code,
+    company_category,
+    company_class,
+    industrial_classification,
+    authorized_capital,
+    paidup_capital,
+    registration_date,
+    registered_address,
+    state_name,
+    gst_state_code,
+    pincode,
+    source,
+    ingested_at,
+    source_version
+FROM raw_staging.stg_mca
+WHERE cin IS NOT NULL
