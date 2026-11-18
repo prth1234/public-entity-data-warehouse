@@ -7,13 +7,14 @@
 
 ## 1. Source 1: IFSC / Bank Branch Master (`rbi_ifsc_razorpay`)
 
-### Catalog Analysis
-- **Surepass.io:** `https://surepass.io/ifsc-code-verification-api/` (`verified` in `surepass.io` sitemap & search results). Input: 11-char IFSC code; Output: bank name, branch, address, MICR, NEFT/RTGS/IMPS/UPI flags. Auth: Bearer API Key; Sandbox available on signup (`verified`).
-- **Perfios:** Bank & IFSC validation is bundled inside Perfios Hub / Bank Account Verification (`verified` via search results; exact endpoint schema behind `https://hub.perfios.com/` login = `undetermined`).
+### Catalog Analysis (Live Retrieved Vendor Pages)
+- **Surepass.io (`https://surepass.io/ifsc-code-verification-api/`):** Retrieved HTTP `200` on `2026-11-18` (`verified`). Title: *"IFSC Code Verification API for Bank Details – Surepass"*. Input: 11-char IFSC code; Output: bank name, branch, address, MICR, NEFT/RTGS/IMPS/UPI flags. Auth: Bearer API Key obtained via free sandbox account signup (*"Get API Key / By creating a free account, you get..."*).
+- **Perfios (`https://perfios.ai/in/products/kyc-kyb/`):** Retrieved HTTP `200` on `2026-11-18` (`verified`). Title: *"Business KYC & KYB Verification Solutions | Perfios"*. Bundles entity IDs, banking/IFSC, and KYB verification behind enterprise OAuth2/API Key on `hub.perfios.com` (`undetermined` exact JSON schema without enterprise login).
 
-### Upstream Tracing & Open-Source Search
-- **Authoritative Upstream:** Reserve Bank of India (RBI) NEFT/RTGS bank branch directory (`verified`).
-- **Open-Source Mirror:** `razorpay/ifsc` on GitHub (`https://github.com/razorpay/ifsc/releases`), latest release **`v2.0.62`** published `2026-09-01T11:55:03Z` (`verified`).
+### Upstream Tracing & Mirror vs. Authority Distinction
+- **Authoritative Upstream:** Reserve Bank of India (RBI) NEFT/RTGS bank branch directory (`verified`). RBI publishes periodic Excel workbooks on `rbi.org.in`, which are non-uniformly formatted across updates.
+- **Open-Source Mirror Used:** `razorpay/ifsc` on GitHub (`https://github.com/razorpay/ifsc/releases`), latest release **`v2.0.62`** published `2026-09-01T11:55:03Z` (`verified`).
+  - **Mirror vs. Authority Note:** `razorpay/ifsc` is a **third-party MIT-licensed mirror**, not the primary regulator (`RBI`). For this prototype, we use Razorpay's release because it parses RBI's Excel sheets into clean, schema-stable CSV/JSON with zero scraping fragility. In production at Zintrl, we would either ingest RBI's primary NEFT/RTGS files directly (using Razorpay's open-source parser logic) or cross-verify deltas against `rbi.org.in` so we never depend solely on a third-party mirror's release cadence.
   - Assets observed (`verified`): `IFSC.csv` (36,368,257 bytes), `banks.json` (299,463 bytes), `IFSC-list.json`, `IFSC.json`, `by-bank.tar.gz`, `sublet.json`.
   - Live public REST endpoint tested: `https://ifsc.razorpay.com/SBIN0000001` returned HTTP `200` with JSON (`verified`).
 
@@ -79,11 +80,41 @@
 
 ---
 
-## 3. Source 3: GSTIN & HSN/SAC Master (`gst_masters` + `gstin_validator`)
+## 3. Source 3: Legal Entity Identifier (LEI) — Official GLEIF (`gleif_lei_official`)
 
-### Catalog Analysis
-- **Surepass.io:** `gst-verification-api`, `gst-return-status-api`, `gst-to-hsn-api`, `hsn-to-gst-api` (`verified` in `surepass.io` sitemap).
-- **Perfios:** `gst-analyser` (`https://perfios.ai/products/gst-analyser/`, `verified` in `perfios.ai` sitemap; return-level analytics are consent/OTP-gated).
+### Catalog Analysis (Live Retrieved Vendor Pages)
+- **Surepass.io (`https://surepass.io/lei-validation-api/`):** Retrieved HTTP `200` on `2026-11-18` (`verified`). Title: *"LEI Validation API - Surepass"*. Description: *"The LEI Validation API helps in the instant verification of LEI codes and company information accurately."* Input: 20-character LEI code; Output: entity legal name, status, registration authority, address. Auth: Bearer API Key (`Get API Key` free sandbox signup).
+- **Perfios:** Covered under `kyc-kyb` / `due-diligence` corporate entity verification (`https://perfios.ai/in/products/kyc-kyb/`, `verified`).
+
+### Upstream Tracing & Open-Source Search
+- **Authoritative Upstream:** Global Legal Entity Identifier Foundation (**GLEIF**), `https://api.gleif.org/api/v1/lei-records` (`verified`). Unlike IFSC (where we used an MIT mirror), this is the **direct authoritative global registry**, free, unauthenticated, and updated 3x daily.
+- **Live Probe (`2026-11-18`):** `https://api.gleif.org/api/v1/lei-records?filter[entity.legalAddress.country]=IN` returned HTTP `200` with **`411,277`** Indian corporate entities (`verified`).
+- **Entity Richness:** Records include `lei`, `legalName`, `status`, `legalAddress.postalCode`, `registeredAt.id` (e.g., `RA000394` = MCA India), and `registeredAs` — which directly surfaces **MCA CINs/LLPINs**, **public GSTINs**, and **Udyam MSME IDs** (`verified`).
+
+### Legitimacy Audit
+- **License:** **CC0 1.0 Universal (Public Domain)** (`verified`). Commercial aggregation and redistribution are explicitly permitted without restriction.
+- **`robots.txt`:** `https://api.gleif.org/robots.txt` returned HTTP `200` with `User-agent: * \n Disallow:` (`verified`).
+- **DPDP Act 2023:** Purely corporate/institutional entity data (`verified`).
+
+### Per-Source Record
+| Field | Value |
+|---|---|
+| **URL** | `https://api.gleif.org/api/v1/lei-records?filter[entity.legalAddress.country]=IN` |
+| **Owner** | Global Legal Entity Identifier Foundation (GLEIF) |
+| **License** | CC0 1.0 Universal (Public Domain) |
+| **Auth Type** | None (open REST API) |
+| **Refresh Cadence** | Daily (GLEIF publishes 3x daily) |
+| **Format & Size** | JSON:API (`411,277` Indian entities; `200` landed across 2 pages in demo) |
+| **Access Date** | `2026-11-18` |
+| **Known Limitations** | Covers entities that have obtained an LEI (typically larger corporates, exporters, borrowers); `1.0%` of sampled records had null `registered_as` (`verified`). |
+
+---
+
+## 4. Source 4 (Supplemental + Production Gap Analysis): GSTIN & HSN/SAC (`gst_masters` + `gstin_validator`)
+
+### Catalog Analysis (Live Retrieved Vendor Pages)
+- **Surepass.io (`https://surepass.io/gst-verification-api/`):** Retrieved HTTP `200` on `2026-11-18` (`verified`). Title: *"GST Verification API for Business Validation | Surepass"*. Input: 15-char GSTIN; Output: legal name, trade name, registration status, principal place of business. Auth: Bearer API Key (sandbox signup).
+- **Perfios (`https://perfios.ai/products/gst-analyser/`):** Listed in `perfios.ai` sitemap (`verified`); return-level analytics require taxpayer consent/OTP.
 
 ### Upstream Tracing & Open-Source Search
 - **Authoritative Upstream:** Goods and Services Tax Network (GSTN) (`services.gst.gov.in`) and Central Board of Indirect Taxes and Customs (CBIC) (`cbic-gst.gov.in`) (`verified`).

@@ -52,3 +52,24 @@ LEFT JOIN warehouse.dim_bank_branch b
 GROUP BY s.gst_state_code, s.state_name
 HAVING COUNT(DISTINCT g.gstin) > 0 OR COUNT(DISTINCT c.cin) > 0
 ORDER BY validated_gstins DESC, mca_companies DESC;
+
+-- Query 4: Official GLEIF LEI entities joined with RBI bank branches by pincode (and MCA CIN where present)
+SELECT
+    l.lei,
+    l.legal_name,
+    l.registered_as AS mca_cin_or_llpin,
+    l.entity_status,
+    l.city,
+    l.pincode,
+    COUNT(b.ifsc) AS branches_in_pincode,
+    c.company_status AS mca_status_if_loaded
+FROM warehouse.dim_lei l
+LEFT JOIN warehouse.dim_bank_branch b
+    ON l.pincode = b.pincode
+LEFT JOIN warehouse.dim_company c
+    ON l.registered_as = c.cin AND c.is_current = TRUE
+GROUP BY
+    l.lei, l.legal_name, l.registered_as, l.entity_status,
+    l.city, l.pincode, c.company_status
+ORDER BY branches_in_pincode DESC, l.lei
+LIMIT 10;

@@ -19,5 +19,18 @@ L70100GJ1992PLC017815   BHARAT GLOBAL DEVELOPERS LIMITED         ACTIVE         
 gst_state_code  state_name  validated_gstins  mca_companies  bank_branches
             24     GUJARAT                 1           2000          12104
             07       DELHI                 1              0           4722
-            29   KARNATAKA                 1              0          13368
             27 MAHARASHTRA                 1              0          24281
+            29   KARNATAKA                 1              0          13368
+
+=== QUERY 4 ===
+                 lei                                  legal_name      mca_cin_or_llpin entity_status      city pincode  branches_in_pincode mca_status_if_loaded
+648800YJO2KIBZLI6176                 PN INFOSOFT PRIVATE LIMITED U72900UP2021PTC145415        ACTIVE     Noida  201301                  255                 None
+894500FEAHX2CLWHH430                  M/S BISHAMBER SAHAI & SONS       09AAPPG1336G1ZR        ACTIVE     Noida  201301                  255                 None
+894500EI9JPDKH9LDK33                                  ANJU GUPTA       06AEEPG2941Q1ZA        ACTIVE   Gurgaon  122001                  244                 None
+648800N18RPOGQKXLE52            CLEANTECH SERVICES AND WORKFORCE   UDYAM-CG-14-0015360        ACTIVE    RAIPUR  492001                  190                 None
+894500FKWUJ2ST3AM003                           RAJKAMAL TEXTILES       06AAHFR1639R1ZM        ACTIVE   PANIPAT  132103                  135                 None
+648800UZB6GYNQ5FCP77                         FABNEST ENTERPRISES       06AALFF6044Q1ZV        ACTIVE    Karnal  132001                  128                 None
+6488000OUC4QGNM22W93 BRAHMA SHANKAR MISHR EDUCATIONAL FOUNDATION U80902UP2019NPL112849        ACTIVE   LUCKNOW  226010                  121                 None
+648800VKIPBV1GBJX862                          J SHARP TECHNOLOGY       09AAJFJ5161G1Z8        ACTIVE   Lucknow  226001                  121                 None
+984500BBF6PFC7EXA957                                 VAANAM 2026                   NaN        ACTIVE    Mumbai  400051                  116                 None
+648800WML27LOOOAJP84                WTF HOLDINGS PRIVATE LIMITED U64200KA2025PTC201132        ACTIVE Bangalore  560001                  110                 None

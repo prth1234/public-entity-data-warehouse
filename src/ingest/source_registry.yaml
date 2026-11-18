@@ -37,3 +37,16 @@ sources:
     tos_verdict: "Captcha on searchtp cannot be bypassed; use public GSTN statistical/HSN downloads + GSP/sandbox schema"
     status: "restricted_live_lookup_public_master_available"
     notes: "Live per-GSTIN lookup requires captcha or GSP access; public CBIC/GSTN HSN & state-wise aggregate data is open."
+
+  gleif_lei_official:
+    name: "GLEIF Global Legal Entity Identifier (LEI) - India Entities"
+    owner: "Global Legal Entity Identifier Foundation (GLEIF)"
+    url: "https://api.gleif.org/api/v1/lei-records?filter[entity.legalAddress.country]=IN"
+    license: "CC0 1.0 Universal (Public Domain)"
+    auth_type: "none (open REST API)"
+    refresh_cadence: "daily (3x daily updates by GLEIF)"
+    access_date: "2026-11-18"
+    robots_verdict: "https://api.gleif.org/robots.txt returned 200 Disallow: (open)"
+    tos_verdict: "CC0 public domain; commercial aggregation & redistribution explicitly permitted"
+    status: "active"
+    notes: "411,277 Indian corporate entities; surfaces LEI, legal name, status, pincode, and registeredAs (MCA CIN/LLPIN, GSTIN, or Udyam ID)."

@@ -84,6 +84,20 @@ CREATE TABLE IF NOT EXISTS warehouse.dim_hsn_sac (
     PRIMARY KEY (code_type, tariff_code)
 );
 
+CREATE TABLE IF NOT EXISTS warehouse.dim_lei (
+    lei VARCHAR PRIMARY KEY,
+    legal_name VARCHAR,
+    entity_status VARCHAR,
+    registration_authority_id VARCHAR,
+    registered_as VARCHAR,
+    city VARCHAR,
+    country VARCHAR,
+    pincode VARCHAR,
+    source VARCHAR NOT NULL,
+    ingested_at VARCHAR NOT NULL,
+    source_version VARCHAR NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS warehouse.fact_company_status_snapshot (
     snapshot_date VARCHAR NOT NULL,
     cin VARCHAR NOT NULL,

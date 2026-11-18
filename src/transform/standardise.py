@@ -373,3 +373,55 @@ def build_validated_gstin_fixture_df() -> pd.DataFrame:
             "source_version": "fixture-v1",
         })
     return pd.DataFrame(rows)
+
+
+def transform_gleif_lei(raw_dir: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
+    """Clean and standardise Indian LEI records from official GLEIF API JSON."""
+    records: list[dict[str, Any]] = []
+    meta_latest: dict[str, Any] = {}
+    for page_file in sorted(raw_dir.glob("gleif_in_page_*.json")):
+        payload = json.loads(page_file.read_text(encoding="utf-8"))
+        meta_file = raw_dir / f"{page_file.name}.meta.json"
+        if meta_file.exists():
+            meta_latest = json.loads(meta_file.read_text(encoding="utf-8"))
+        records.extend(payload.get("data", []))
+
+    if not records:
+        raise ValueError(f"No GLEIF records found in {raw_dir}")
+
+    rows: list[dict[str, Any]] = []
+    for rec in records:
+        attrs = rec.get("attributes", {})
+        ent = attrs.get("entity", {})
+        addr = ent.get("legalAddress") or {}
+        reg_at = ent.get("registeredAt") or {}
+        pin_raw = normalise_text(addr.get("postalCode"))
+        pin = extract_pincode(pin_raw) if pin_raw else None
+        reg_as = normalise_text(ent.get("registeredAs"))
+        rows.append({
+            "lei": str(rec["id"]).strip().upper(),
+            "legal_name": normalise_text((ent.get("legalName") or {}).get("name")),
+            "entity_status": normalise_status(ent.get("status")),
+            "registration_authority_id": normalise_text(reg_at.get("id")),
+            "registered_as": reg_as.upper() if reg_as else None,
+            "city": normalise_text(addr.get("city")),
+            "country": normalise_text(addr.get("country")),
+            "pincode": pin,
+            "source": "gleif_lei_official",
+            "ingested_at": meta_latest.get("fetched_at", datetime.now(timezone.utc).isoformat()),
+            "source_version": str(meta_latest.get("source_version", "gleif-v1")),
+        })
+
+    df = pd.DataFrame(rows)
+    raw_rows = len(df)
+    dup_count = int(df.duplicated(subset=["lei"]).sum())
+    df = df.drop_duplicates(subset=["lei"], keep="first").reset_index(drop=True)
+    metrics = {
+        "source": "gleif_lei",
+        "raw_rows": raw_rows,
+        "clean_rows": len(df),
+        "duplicates_dropped": dup_count,
+        "null_rate_registered_as": round(float(df["registered_as"].isna().mean()), 4),
+        "null_rate_pincode": round(float(df["pincode"].isna().mean()), 4),
+    }
+    return df, metrics

@@ -14,6 +14,7 @@ import pandas as pd
 from src.transform.standardise import (
     build_state_dim_df,
     build_validated_gstin_fixture_df,
+    transform_gleif_lei,
     transform_gst_hsn_sac,
     transform_ifsc,
     transform_mca,
@@ -46,11 +47,13 @@ def run_warehouse_load(base_dir: Path, db_path: Path | None = None) -> dict[str,
     ifsc_dir = latest_raw_date_dir(base_dir, "rbi_ifsc")
     mca_dir = latest_raw_date_dir(base_dir, "mca_company")
     gst_dir = latest_raw_date_dir(base_dir, "gst_masters")
+    gleif_dir = latest_raw_date_dir(base_dir, "gleif_lei")
 
     state_df = build_state_dim_df()
     ifsc_df, ifsc_metrics = transform_ifsc(ifsc_dir)
     mca_df, mca_metrics = transform_mca(mca_dir)
     hsn_df, hsn_metrics = transform_gst_hsn_sac(gst_dir)
+    lei_df, lei_metrics = transform_gleif_lei(gleif_dir)
     gstin_df = build_validated_gstin_fixture_df()
 
     # Map state_name -> gst_state_code
@@ -67,12 +70,14 @@ def run_warehouse_load(base_dir: Path, db_path: Path | None = None) -> dict[str,
     con.register("stg_ifsc_df", ifsc_df)
     con.register("stg_mca_df", mca_df)
     con.register("stg_hsn_df", hsn_df)
+    con.register("stg_lei_df", lei_df)
     con.register("stg_gstin_df", gstin_df)
 
     # Materialise raw_staging tables
     con.execute("CREATE OR REPLACE TABLE raw_staging.stg_ifsc AS SELECT * FROM stg_ifsc_df")
     con.execute("CREATE OR REPLACE TABLE raw_staging.stg_mca AS SELECT * FROM stg_mca_df")
     con.execute("CREATE OR REPLACE TABLE raw_staging.stg_hsn_sac AS SELECT * FROM stg_hsn_df")
+    con.execute("CREATE OR REPLACE TABLE raw_staging.stg_lei AS SELECT * FROM stg_lei_df")
     con.execute("CREATE OR REPLACE TABLE raw_staging.stg_gstin AS SELECT * FROM stg_gstin_df")
 
     # Idempotent dimension loads
@@ -87,6 +92,7 @@ def run_warehouse_load(base_dir: Path, db_path: Path | None = None) -> dict[str,
     """)
     con.execute("INSERT OR REPLACE INTO warehouse.dim_gstin SELECT * FROM stg_gstin_df")
     con.execute("INSERT OR REPLACE INTO warehouse.dim_hsn_sac SELECT * FROM stg_hsn_df")
+    con.execute("INSERT OR REPLACE INTO warehouse.dim_lei SELECT * FROM stg_lei_df")
 
     # SCD Type 2 for warehouse.dim_company
     mca_df["record_hash"] = mca_df.apply(_record_hash, axis=1)
@@ -176,6 +182,7 @@ def run_warehouse_load(base_dir: Path, db_path: Path | None = None) -> dict[str,
         "dim_company": con.execute("SELECT COUNT(*) FROM warehouse.dim_company").fetchone()[0],
         "dim_gstin": con.execute("SELECT COUNT(*) FROM warehouse.dim_gstin").fetchone()[0],
         "dim_hsn_sac": con.execute("SELECT COUNT(*) FROM warehouse.dim_hsn_sac").fetchone()[0],
+        "dim_lei": con.execute("SELECT COUNT(*) FROM warehouse.dim_lei").fetchone()[0],
         "fact_company_status_snapshot": con.execute("SELECT COUNT(*) FROM warehouse.fact_company_status_snapshot").fetchone()[0],
         "fact_gst_registration": con.execute("SELECT COUNT(*) FROM warehouse.fact_gst_registration").fetchone()[0],
     }
@@ -187,6 +194,7 @@ def run_warehouse_load(base_dir: Path, db_path: Path | None = None) -> dict[str,
             "ifsc": ifsc_metrics,
             "mca": mca_metrics,
             "hsn_sac": hsn_metrics,
+            "gleif_lei": lei_metrics,
         },
         "warehouse_counts": counts,
         "scd_inserts_this_run": len(scd_inserts),
