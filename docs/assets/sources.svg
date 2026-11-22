@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220" width="900" height="220">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 228" width="900" height="228" role="img" aria-label="Verified open data sources and record counts">
   <style>
   text { font-family: "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -8,11 +8,32 @@
   .green { fill: #34D399; }
   .amber { fill: #FBBF24; }
   .bd { fill: none; stroke: #334155; stroke-width: 1.3; }
-  .bd-blue { fill: none; stroke: #60A5FA; stroke-width: 1.3; }
-  .bd-green { fill: none; stroke: #34D399; stroke-width: 1.3; }
-  .bd-amber { fill: none; stroke: #FBBF24; stroke-width: 1.3; }
-  .flow { fill: none; stroke: #60A5FA; stroke-width: 1.5; stroke-dasharray: 5 4; animation: march 1.4s linear infinite; }
-  @keyframes march { to { stroke-dashoffset: -18; } }
+  .bar-bg { fill: none; stroke: #334155; stroke-width: 2; stroke-linecap: round; }
+  .bar-g { fill: none; stroke: #34D399; stroke-width: 2; stroke-linecap: round; }
+  .bar-b { fill: none; stroke: #60A5FA; stroke-width: 2; stroke-linecap: round; }
+  .bar-a { fill: none; stroke: #FBBF24; stroke-width: 2; stroke-linecap: round; }
+
+  .dw-c1 { animation: dw-cg 10s ease-in-out infinite 0s; }
+  .dw-c2 { animation: dw-cb 10s ease-in-out infinite 2s; }
+  .dw-c3 { animation: dw-cb 10s ease-in-out infinite 4s; }
+  .dw-c4 { animation: dw-cg 10s ease-in-out infinite 6s; }
+  .dw-c5 { animation: dw-ca 10s ease-in-out infinite 8s; }
+
+  @keyframes dw-cg { 0%, 16% { stroke: #34D399; stroke-width: 1.8; } 22%, 100% { stroke: #334155; stroke-width: 1.3; } }
+  @keyframes dw-cb { 0%, 16% { stroke: #60A5FA; stroke-width: 1.8; } 22%, 100% { stroke: #334155; stroke-width: 1.3; } }
+  @keyframes dw-ca { 0%, 16% { stroke: #FBBF24; stroke-width: 1.8; } 22%, 100% { stroke: #334155; stroke-width: 1.3; } }
+
+  .dw-b1, .dw-b2, .dw-b3 { stroke-dasharray: 244; stroke-dashoffset: 244; }
+  .dw-b4, .dw-b5 { stroke-dasharray: 394; stroke-dashoffset: 394; }
+  .dw-b1 { animation: dw-sweep-s 10s ease-in-out infinite 0s; }
+  .dw-b2 { animation: dw-sweep-s 10s ease-in-out infinite 2s; }
+  .dw-b3 { animation: dw-sweep-s 10s ease-in-out infinite 4s; }
+  .dw-b4 { animation: dw-sweep-l 10s ease-in-out infinite 6s; }
+  .dw-b5 { animation: dw-sweep-l 10s ease-in-out infinite 8s; }
+
+  @keyframes dw-sweep-s { 0% { stroke-dashoffset: 244; opacity: 0.4; } 14% { stroke-dashoffset: 0; opacity: 1; } 22%, 100% { stroke-dashoffset: 244; opacity: 0.25; } }
+  @keyframes dw-sweep-l { 0% { stroke-dashoffset: 394; opacity: 0.4; } 14% { stroke-dashoffset: 0; opacity: 1; } 22%, 100% { stroke-dashoffset: 394; opacity: 0.25; } }
+
   @media (prefers-color-scheme: light) {
     .fg { fill: #0F172A; }
     .mut { fill: #475569; }
@@ -20,39 +41,54 @@
     .green { fill: #059669; }
     .amber { fill: #D97706; }
     .bd { stroke: #CBD5E1; }
-    .bd-blue { stroke: #1D4ED8; }
-    .bd-green { stroke: #10B981; }
-    .bd-amber { stroke: #F59E0B; }
-    .flow { stroke: #1D4ED8; }
+    .bar-bg { stroke: #CBD5E1; }
+    .bar-g { stroke: #059669; }
+    .bar-b { stroke: #1D4ED8; }
+    .bar-a { stroke: #D97706; }
+    @keyframes dw-cg { 0%, 16% { stroke: #059669; stroke-width: 1.8; } 22%, 100% { stroke: #CBD5E1; stroke-width: 1.3; } }
+    @keyframes dw-cb { 0%, 16% { stroke: #1D4ED8; stroke-width: 1.8; } 22%, 100% { stroke: #CBD5E1; stroke-width: 1.3; } }
+    @keyframes dw-ca { 0%, 16% { stroke: #D97706; stroke-width: 1.8; } 22%, 100% { stroke: #CBD5E1; stroke-width: 1.3; } }
   }
   @media (prefers-reduced-motion: reduce) {
-    .flow { animation: none; }
+    .dw-c1, .dw-c2, .dw-c3, .dw-c4, .dw-c5,
+    .dw-b1, .dw-b2, .dw-b3, .dw-b4, .dw-b5 { animation: none !important; stroke-dashoffset: 0 !important; opacity: 0.5 !important; }
   }
-</style>
+  </style>
+
   <!-- Row 1: 3 cards -->
-  <rect x="10" y="10" width="280" height="92" rx="4" class="bd"/>
+  <rect x="10" y="10" width="280" height="96" rx="4" class="bd dw-c1"/>
   <text x="28" y="38" font-size="19" font-weight="700" class="mono green">183,214</text>
   <text x="28" y="62" font-size="15" font-weight="600" class="fg">RBI Bank Branches</text>
-  <text x="28" y="84" font-size="12.5" class="mut">razorpay/ifsc v2.0.62 (MIT)</text>
+  <text x="28" y="82" font-size="12.5" class="mut">razorpay/ifsc v2.0.62 (MIT)</text>
+  <line x1="28" y1="96" x2="272" y2="96" class="bar-bg"/>
+  <line x1="28" y1="96" x2="272" y2="96" class="bar-g dw-b1"/>
 
-  <rect x="310" y="10" width="280" height="92" rx="4" class="bd"/>
+  <rect x="310" y="10" width="280" height="96" rx="4" class="bd dw-c2"/>
   <text x="328" y="38" font-size="19" font-weight="700" class="mono blue">8,408</text>
   <text x="328" y="62" font-size="15" font-weight="600" class="fg">MCA Company CINs</text>
-  <text x="328" y="84" font-size="12.5" class="mut">api.data.gov.in (GODL)</text>
+  <text x="328" y="82" font-size="12.5" class="mut">api.data.gov.in (GODL)</text>
+  <line x1="328" y1="96" x2="572" y2="96" class="bar-bg"/>
+  <line x1="328" y1="96" x2="572" y2="96" class="bar-b dw-b2"/>
 
-  <rect x="610" y="10" width="280" height="92" rx="4" class="bd"/>
+  <rect x="610" y="10" width="280" height="96" rx="4" class="bd dw-c3"/>
   <text x="628" y="38" font-size="19" font-weight="700" class="mono blue">10,000</text>
   <text x="628" y="62" font-size="15" font-weight="600" class="fg">Indian GLEIF LEIs</text>
-  <text x="628" y="84" font-size="12.5" class="mut">api.gleif.org (CC0, 10K cap)</text>
+  <text x="628" y="82" font-size="12.5" class="mut">api.gleif.org (CC0, 10K cap)</text>
+  <line x1="628" y1="96" x2="872" y2="96" class="bar-bg"/>
+  <line x1="628" y1="96" x2="872" y2="96" class="bar-b dw-b3"/>
 
   <!-- Row 2: 2 cards -->
-  <rect x="10" y="118" width="430" height="90" rx="4" class="bd"/>
-  <text x="28" y="146" font-size="19" font-weight="700" class="mono green">19,300</text>
-  <text x="28" y="170" font-size="15" font-weight="600" class="fg">India Post Pincodes (dim_pincode)</text>
-  <text x="28" y="192" font-size="12.5" class="mut">MIT mirror + district inference fallback</text>
+  <rect x="10" y="122" width="430" height="96" rx="4" class="bd dw-c4"/>
+  <text x="28" y="150" font-size="19" font-weight="700" class="mono green">19,300</text>
+  <text x="28" y="174" font-size="15" font-weight="600" class="fg">India Post Pincodes (dim_pincode)</text>
+  <text x="28" y="194" font-size="12.5" class="mut">MIT mirror + district inference fallback</text>
+  <line x1="28" y1="208" x2="422" y2="208" class="bar-bg"/>
+  <line x1="28" y1="208" x2="422" y2="208" class="bar-g dw-b4"/>
 
-  <rect x="460" y="118" width="430" height="90" rx="4" class="bd-amber"/>
-  <text x="478" y="146" font-size="19" font-weight="700" class="mono amber">649 + Mod-36</text>
-  <text x="478" y="170" font-size="15" font-weight="600" class="fg">CBIC HSN/SAC &amp; GSTIN Validator</text>
-  <text x="478" y="192" font-size="12.5" class="mut">Captcha/GSP-gated registry isolated; offline checksum</text>
+  <rect x="460" y="122" width="430" height="96" rx="4" class="bd dw-c5"/>
+  <text x="478" y="150" font-size="19" font-weight="700" class="mono amber">649 + Mod-36</text>
+  <text x="478" y="174" font-size="15" font-weight="600" class="fg">CBIC HSN/SAC &amp; GSTIN Validator</text>
+  <text x="478" y="194" font-size="12.5" class="mut">Captcha/GSP-gated registry isolated; offline checksum</text>
+  <line x1="478" y1="208" x2="872" y2="208" class="bar-bg"/>
+  <line x1="478" y1="208" x2="872" y2="208" class="bar-a dw-b5"/>
 </svg>
